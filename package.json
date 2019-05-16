@@ -1,0 +1,18 @@
+{
+  "name": "cluster-manager",
+  "version": "0.1.0",
+  "description": "Vosbot Cluster management module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "forever": "npx supervisor index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.456.0",
+    "dotenv": "^8.0.0",
+    "sqs-consumer": "^5.2.0"
+  }
+}
