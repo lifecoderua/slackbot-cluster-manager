@@ -1,25 +1,27 @@
 const AWS = require('aws-sdk');
-// Set the region 
+
+// TODO: STOP HERE
+return;
 
 // Create the DynamoDB service object
 const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
-// const params = {
-//   TableName: 'vosbot',
-//   Item: {
-//     'CUSTOMER_ID' : {N: '001'},
-//     'CUSTOMER_NAME' : {S: 'Richard Roe'}
-//   }
-// };
+const params = {
+  TableName: 'vosbot',
+  Item: {
+    'appId' : {S: 'cluterManager'},
+    'CUSTOMER_NAME' : {S: 'Richard 2 Roe'}
+  }
+};
 
 // Call DynamoDB to add the item to the table
-// ddb.putItem(params, function(err, data) {
-//   if (err) {
-//     console.log("Error", err);
-//   } else {
-//     console.log("Success", data);
-//   }
-// });
+ddb.putItem(params, function(err, data) {
+  if (err) {
+    console.log("Error", err);
+  } else {
+    console.log("Success", data);
+  }
+});
 
 
 // const params = {
