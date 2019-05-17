@@ -8,8 +8,10 @@ var AWS = require('aws-sdk');
 const app = Consumer.create({
   queueUrl: process.env.BOT_OUTPUT_QUEUE,
   handleMessage: async (message) => {
-    // do some work with `message`
     console.log(message);
+
+    // Skip message removal
+    // throw('NotMyMessage');
   }
 });
 
@@ -46,7 +48,7 @@ var params = {
   MessageGroupId: 'default',
   MessageDeduplicationId: '1',
   MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
-  QueueUrl: BOT_INPUT_QUEUE,
+  QueueUrl: process.env.BOT_INPUT_QUEUE,
 };
 
 sqs.sendMessage(params, function(err, data) {
