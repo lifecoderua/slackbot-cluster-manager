@@ -5,6 +5,9 @@ var AWS = require('aws-sdk');
 const region = 'us-west-2';
 AWS.config.update({region});
 
+
+require('./app/sqs');
+
 var cloudformation = new AWS.CloudFormation();
 
 
