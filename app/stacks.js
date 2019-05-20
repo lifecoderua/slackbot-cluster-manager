@@ -29,6 +29,8 @@ cloudformation.describeStacks({}, (err, data) => {
   const publicStacks = publicOnly(formattedStacks);
 
   stacksList = publicStacks;
+
+  console.log("StackList:", stacksList.map(stack => `{"text": {"type": "plain_text","text": "${stack.domain}"},"value": "[clusterManagement]selectTeamCluster:${stack.domain}"},`)); //stack.domain));
 })
 
 function logError(err) {
