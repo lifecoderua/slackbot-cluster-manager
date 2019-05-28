@@ -5,7 +5,9 @@ var AWS = require('aws-sdk');
 const region = 'us-west-2';
 AWS.config.update({region});
 
+require('./app/store');
 
+return;
 require('./app/sqs');
 
 require('./app/config');
