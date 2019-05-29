@@ -77,7 +77,7 @@ function getCloudlinkIPs(domain) {
     });
   })
 
-  
+
 
   console.log('****', targetStack);
 }
@@ -100,6 +100,18 @@ async function run() {
 
     // ^--- non-async; use cached anyway
     getCloudlinkIPs('replicantsinc-01.nebula.video');
+
+    // TODO: DANGER ZONE
+    return;
+    // stack deletion
+    const targetStack = stacksList.find(entry => entry.domain === domain);
+    const deleteStackParams = {
+      StackName: targetStack.name,
+    }
+    cloudformation.deleteStack(params, function(err, data) {
+      if (err) console.log(err, err.stack); // an error occurred
+      else     console.log(data);           // successful response
+    });
   });
   
 }
