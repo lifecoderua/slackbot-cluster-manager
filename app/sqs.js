@@ -8,10 +8,8 @@ var AWS = require('aws-sdk');
 const app = Consumer.create({
   queueUrl: process.env.BOT_OUTPUT_QUEUE,
   handleMessage: async (messageJSON) => {
-    console.log('11111', messageJSON);
     try {
       const message = JSON.parse(messageJSON.Body);
-      console.log(message);
   
       reply(message);
     } catch(e) {
@@ -68,7 +66,6 @@ var params = {
 
 
 function reply(message) {
-  console.log('zzz');
   const response = {
     trigger_id: message.trigger_id,
     blocks: [
@@ -82,11 +79,9 @@ function reply(message) {
     ],
   }
   
-  params.MessageDeduplicationId = message.trigger_id,
+  params.MessageDeduplicationId = Date.now().toString() + message.trigger_id,
   params.MessageBody = JSON.stringify(response);
-
-  console.log('eee');
-
+console.log('**&&', params);
   sqs.sendMessage(params, function(err, data) {
     if (err) {
       console.log("Error", err);
