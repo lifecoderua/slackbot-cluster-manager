@@ -71,10 +71,18 @@ function reply(message) {
   console.log('zzz');
   const response = {
     trigger_id: message.trigger_id,
-    blocks: 'yay! 123456',
+    blocks: [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Hi Team! What do you want today?"
+        }
+      }
+    ],
   }
   
-  params.MessageDeduplicationId = Math.random().toString(),
+  params.MessageDeduplicationId = message.trigger_id,
   params.MessageBody = JSON.stringify(response);
 
   console.log('eee');

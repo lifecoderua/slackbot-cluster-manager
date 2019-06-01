@@ -6,9 +6,9 @@ const region = 'us-west-2';
 AWS.config.update({region});
 
 
-require('./app/stacks');
+// require('./app/stacks');
 
-return;
+// return;
 
 require('./app/store');
 
