@@ -1,6 +1,7 @@
 // Load the AWS SDK for Node.js
 const { Consumer } = require('sqs-consumer');
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
+const clusterManagerPayloadHandler = require('./cluster-manager');
 // Set the region 
 // AWS.config.update({region: 'REGION'});
 
@@ -66,17 +67,12 @@ var params = {
 
 
 function reply(message) {
+  console.log(message);
   const response = {
     trigger_id: message.trigger_id,
-    blocks: [
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text": "Hi Team! What do you want today?"
-        }
-      }
-    ],
+    // message.user.id - uid for TZ
+    // message.channel.id - for notifications
+    blocks: clusterManagerPayloadHandler(message),
   }
   
   params.MessageDeduplicationId = Date.now().toString() + message.trigger_id,
