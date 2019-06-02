@@ -26,8 +26,8 @@ function getStacks() {
   return stacksList;
 }
 
-function getStackDomainOptions() {
-  return stacksList.map(stack => ({"text": {"type": "plain_text","text": `${stack.domain}`},"value": `[CM.SelectCluster]${stack.domain}`}));
+function getStackDomainOptions(prefix = 'CM.SelectCluster') {
+  return stacksList.map(stack => ({"text": {"type": "plain_text","text": `${stack.domain}`},"value": `[${prefix}]${stack.domain}`}));
 }
 
 function getCloudlinkIPs(domain) {

@@ -9,7 +9,6 @@ const Timer = require('./timer');
 
 module.exports = async function handleSlackPayload(payload) {
   if (payload.actions[0].value === '[ClusterManager]SelectCluster') {
-    console.log('WUT::::', clusterManagementPayload(Stacks.getStackDomainOptions()));
     return clusterManagementPayload(Stacks.getStackDomainOptions());
   }
   console.log('OUT______________::::');
@@ -37,6 +36,13 @@ module.exports = async function handleSlackPayload(payload) {
           timeZone: user.tz,
         });
         break;
+      case 'UM.SelectCluster':
+        console.log('Uplink Cluster selected!!::', value);
+        Store.update(payload.channel.id, {
+          uplinkClusterDomain: value,
+          uplinkClusterNameReported: 'NULL',
+        });
+        break;
     }
     return;
   }
@@ -53,7 +59,7 @@ module.exports = async function handleSlackPayload(payload) {
     case '[ClusterManager]DeleteCluster': 
       return clusterManagementDelete;
     case '[UplinksManager]DiscoverUplinks': 
-      return require('./payload/discover-uplinks');
+      return require('./payload/discover-uplinks')(Stacks.getStackDomainOptions('UM.SelectCluster'));
   }
   
   console.log('+1', payload.actions[0].selected_option.value);
