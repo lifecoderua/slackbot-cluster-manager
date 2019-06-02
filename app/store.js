@@ -1,4 +1,7 @@
-module.exports = {};
+module.exports = {
+  get,
+  update
+};
 
 const credentials = {
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -9,7 +12,9 @@ const credentials = {
 db = require('dynasty')(credentials);
 data = db.table('vosbot-cluster-management');
 
-data.scan().then(teams => console.log(teams));
+let teams = [];
+
+data.scan().then(teamsData => teams = teamsData);
 
 class StoreManager {
   constructor() {
@@ -17,6 +22,22 @@ class StoreManager {
     // normalize structure if needed - though should be normal by default
     // convert into inner data: time-team pairs, etc.
   }
+}
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function get(teamId) {
+  data.scan().then(teamsData => teams = teamsData);
+  return clone(teams[teamId]);
+}
+
+function update(teamId, payload) {
+  // console.log('!!!!:::::!!!!', payload);
+  data.update(teamId, payload)
+    .then(res => console.log(res))
+    .catch(err => console.error('UPDATE ERROR', err))
 }
 
 return;

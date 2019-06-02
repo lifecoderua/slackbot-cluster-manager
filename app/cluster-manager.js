@@ -1,22 +1,14 @@
 const clusterManagementPayload = require('./payload/cluster-management-config');
 const clusterManagementNotification = require('./payload/cluster-management-notification');
 const clusterManagementDelete = require('./payload/cluster-management-delete');
+const Stacks = require('./stacks');
+const Store = require('./store');
+const UserInfo = require('./userinfo');
 
 
-module.exports = function handleSlackPayload(payload) {
+module.exports = async function handleSlackPayload(payload) {
   if (payload.actions[0].value === '[ClusterManager]SelectCluster') {
-    return clusterManagementPayload([ 
-      {"text": {"type": "plain_text","text": "novsdeploymentstaging-01.nebula.video"},"value": "[CM.SelectCluster]novsdeploymentstaging-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "saas-deployment-staging-test-01.nebula.video"},"value": "[CM.SelectCluster]saas-deployment-staging-test-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "vos-deploy-ngde3400-13-01.nebula.video"},"value": "[CM.SelectCluster]vos-deploy-ngde3400-13-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "replicants-white-01.nebula.video"},"value": "[CM.SelectCluster]replicants-white-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "white-walker-01.nebula.video"},"value": "[CM.SelectCluster]white-walker-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "replicantsinc-01.nebula.video"},"value": "[CM.SelectCluster]replicantsinc-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "corsica-tm2-01.nebula.video"},"value": "[CM.SelectCluster]corsica-tm2-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "hkvpurple-01.nebula.video"},"value": "[CM.SelectCluster]hkvpurple-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "2-01.nebula.video"},"value": "[CM.SelectCluster]2-01.nebula.video"},
-      {"text": {"type": "plain_text","text": "cduval-01.nebula.video"},"value": "[CM.SelectCluster]cduval-01.nebula.video"},
-    ]);
+    return clusterManagementPayload(Stacks.getStackDomainOptions());
   }
   
   if (payload.actions[0].type === 'static_select') {
@@ -27,6 +19,16 @@ module.exports = function handleSlackPayload(payload) {
     switch(action) {
       case 'CM.SelectCluster':
         console.log('RESULT!!::', value);
+        const user = await UserInfo.getUserInfo(payload.user.id)
+        Store.update(payload.channel.id, {
+          clusterDns: value,
+          checkTime: '7pm',
+          configuredBy: { 
+            userId: user.id,
+            userName: user.name,
+          },
+          timeZone: user.tz,
+        });
         break;
     }
     return;

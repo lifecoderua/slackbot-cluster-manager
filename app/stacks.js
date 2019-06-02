@@ -1,4 +1,7 @@
-module.exports = getStacks;
+module.exports = {
+  getStacks,
+  getStackDomainOptions,
+}
 
 const AWS = require('aws-sdk');
 
@@ -7,12 +10,17 @@ let stacksList = [];
 var CronJob = require('cron').CronJob;
 const job = new CronJob('0 */5 * * * *', () => {
   console.log('You will see this message every minute', Date.now());
+  run();
 });
 
 job.start();
 
 function getStacks() {
   return stacksList;
+}
+
+function getStackDomainOptions() {
+  return stacksList.map(stack => ({"text": {"type": "plain_text","text": `${stack.domain}`},"value": `[CM.SelectCluster]${stack.domain}`}));
 }
 
 function getCloudlinkIPs(domain) {
@@ -95,11 +103,12 @@ async function run() {
     const publicStacks = publicOnly(formattedStacks);
   
     stacksList = publicStacks;
-  
-    console.log("StackList:", stacksList.map(stack => `{"text": {"type": "plain_text","text": "${stack.domain}"},"value": "[clusterManagement]selectTeamCluster:${stack.domain}"},`)); //stack.domain));
+    // console.log("StackList:", stacksList.map(stack => `{"text": {"type": "plain_text","text": "${stack.domain}"},"value": "[clusterManagement]selectTeamCluster:${stack.domain}"},`)); //stack.domain));
 
     // ^--- non-async; use cached anyway
-    getCloudlinkIPs('replicantsinc-01.nebula.video');
+
+    // TODO: Uplinks IP Getter
+    // getCloudlinkIPs('replicantsinc-01.nebula.video');
 
     // TODO: DANGER ZONE
     return;
