@@ -6,7 +6,7 @@ const region = 'us-west-2';
 AWS.config.update({region});
 
 
-// require('./app/stacks');
+require('./app/stacks').startCron();
 
 // return;
 

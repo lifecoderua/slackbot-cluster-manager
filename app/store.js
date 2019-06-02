@@ -1,6 +1,7 @@
 module.exports = {
+  all,
   get,
-  update
+  update,
 };
 
 const credentials = {
@@ -28,8 +29,13 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+async function all() {
+  teams = await data.scan();
+  return clone(teams);
+}
+
 function get(teamId) {
-  data.scan().then(teamsData => teams = teamsData);
+  // data.scan().then(teamsData => teams = teamsData);
   return clone(teams[teamId]);
 }
 

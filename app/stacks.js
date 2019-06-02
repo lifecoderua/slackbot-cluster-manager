@@ -1,22 +1,78 @@
 module.exports = {
+  startCron,
   getStacks,
   getStackDomainOptions,
+  getCloudlinkIPs,
 }
 
 const AWS = require('aws-sdk');
+const cloudformation = new AWS.CloudFormation();
 
 const post = require('./post');
+const Store = require('./store');
 
 let stacksList = [];
+let stackDomainList = {};
 
-var CronJob = require('cron').CronJob;
-const job = new CronJob('0 */5 * * * *', () => {
+const CronJob = require('cron').CronJob;
+const job = new CronJob('0 */5 * * * *', async () => {
   console.log('You will see this message every 5 minutes', Date.now());
+  // TODO: some sync would be nice, as watchCloudLinks() expects run() results to be in place;
   run();
+
+  watchCloudLinks();
 });
 
-job.start();
+function startCron() {
+  job.start();
+}
 
+async function watchCloudLinks() {
+  await run();
+  (await Store.all()).forEach((teamData) => {
+    if (teamData.uplinkClusterDomain) {
+      console.log('FOUND', teamData);
+      // TODO: suboptimal, to maintain a domain=>stack list
+      const targetStack = stacksList.find(stack => stack.domain === teamData.uplinkClusterDomain);
+      if (!targetStack) { return; }
+
+      console.log('TARGET__STACK', targetStack);
+      if (targetStack.name === teamData.uplinkClusterNameReported) { return; }
+      if (!['CREATE_COMPLETE', 'UPDATE_COMPLETE'].includes(targetStack.status)) { return; }
+
+      // TODO: ensure targetStack.status is 'CREATE_COMPLETE' or 'UPDATE_COMPLETE'
+      Store.update(teamData.teamId, {
+        uplinkClusterNameReported: targetStack.name,
+      });
+
+      getCloudlinkIPs(teamData.uplinkClusterDomain, teamData.teamId);
+    }
+  });
+}
+
+// async function qtest() {
+//   await run();
+//   (await Store.all()).forEach((teamData) => {
+//     if (teamData.uplinkClusterDomain) {
+//       console.log('FOUND', teamData);
+//       // TODO: suboptimal, to maintain a domain=>stack list
+//       const targetStack = stacksList.find(stack => stack.domain === teamData.uplinkClusterDomain);
+//       if (!targetStack) { return; }
+
+//       console.log('TARGET__STACK', targetStack);
+//       if (targetStack.name === teamData.uplinkClusterNameReported) { return; }
+//       if (!['CREATE_COMPLETE', 'UPDATE_COMPLETE'].includes(targetStack.status)) { return; }
+
+//       // TODO: ensure targetStack.status is 'CREATE_COMPLETE' or 'UPDATE_COMPLETE'
+//       Store.update(teamData.teamId, {
+//         uplinkClusterNameReported: targetStack.name,
+//       });
+
+//       getCloudlinkIPs(teamData.uplinkClusterDomain, teamData.teamId);
+//     }
+//   });
+// }
+// qtest();
 // post({
 //   channel: <channelId>,
 //   text: 'I feel fine',
@@ -30,7 +86,7 @@ function getStackDomainOptions(prefix = 'CM.SelectCluster') {
   return stacksList.map(stack => ({"text": {"type": "plain_text","text": `${stack.domain}`},"value": `[${prefix}]${stack.domain}`}));
 }
 
-function getCloudlinkIPs(domain) {
+function getCloudlinkIPs(domain, channelId) {
   const targetStack = stacksList.find(entry => entry.domain === domain);
   cloudformation.describeStackResource({StackName: targetStack.name, LogicalResourceId: 'UplinkInstanceGroup'}, (err, data) => {
     if (err) {
@@ -88,6 +144,11 @@ function getCloudlinkIPs(domain) {
         
         // TODO: could it be over multiple reservations?
         console.log('Cloudlink IPs:', data.Reservations[0].Instances.map(i => i.PublicIpAddress));           // successful response
+        const UplinkIPs = data.Reservations[0].Instances.map(i => i.PublicIpAddress).join("\n");
+        post({
+          channel: channelId,
+          text: `Uplink discovery for **${domain}**\n${UplinkIPs}`,
+        });
       });
     });
   })
@@ -96,8 +157,6 @@ function getCloudlinkIPs(domain) {
 
   console.log('****', targetStack);
 }
-
-var cloudformation = new AWS.CloudFormation();
 
 async function run() {
   await cloudformation.describeStacks({}, (err, data) => {
@@ -110,6 +169,7 @@ async function run() {
     const publicStacks = publicOnly(formattedStacks);
   
     stacksList = publicStacks;
+
     // console.log("StackList:", stacksList.map(stack => `{"text": {"type": "plain_text","text": "${stack.domain}"},"value": "[clusterManagement]selectTeamCluster:${stack.domain}"},`)); //stack.domain));
 
     // ^--- non-async; use cached anyway

@@ -42,6 +42,8 @@ module.exports = async function handleSlackPayload(payload) {
           uplinkClusterDomain: value,
           uplinkClusterNameReported: 'NULL',
         });
+        Stacks.getCloudlinkIPs(value, payload.channel.id);
+        // TODO: return confirmation
         break;
     }
     return;
