@@ -5,6 +5,8 @@ module.exports = {
 
 const AWS = require('aws-sdk');
 
+const post = require('./post');
+
 let stacksList = [];
 
 var CronJob = require('cron').CronJob;
@@ -14,6 +16,11 @@ const job = new CronJob('0 */5 * * * *', () => {
 });
 
 job.start();
+
+// post({
+//   channel: <channelId>,
+//   text: 'I feel fine',
+// })
 
 function getStacks() {
   return stacksList;
