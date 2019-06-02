@@ -66,13 +66,13 @@ var params = {
 // });
 
 
-function reply(message) {
+async function reply(message) {
   console.log(message);
   const response = {
     trigger_id: message.trigger_id,
     // message.user.id - uid for TZ
     // message.channel.id - for notifications
-    blocks: clusterManagerPayloadHandler(message),
+    blocks: await clusterManagerPayloadHandler(message),
   }
   
   params.MessageDeduplicationId = Date.now().toString() + message.trigger_id,

@@ -4,12 +4,15 @@ const clusterManagementDelete = require('./payload/cluster-management-delete');
 const Stacks = require('./stacks');
 const Store = require('./store');
 const UserInfo = require('./userinfo');
+const Timer = require('./timer');
 
 
 module.exports = async function handleSlackPayload(payload) {
   if (payload.actions[0].value === '[ClusterManager]SelectCluster') {
+    console.log('WUT::::', clusterManagementPayload(Stacks.getStackDomainOptions()));
     return clusterManagementPayload(Stacks.getStackDomainOptions());
   }
+  console.log('OUT______________::::');
   
   if (payload.actions[0].type === 'static_select') {
     // ...
@@ -19,14 +22,18 @@ module.exports = async function handleSlackPayload(payload) {
     switch(action) {
       case 'CM.SelectCluster':
         console.log('RESULT!!::', value);
-        const user = await UserInfo.getUserInfo(payload.user.id)
+        const user = await UserInfo.getUserInfo(payload.user.id);
+        const checkHour = 19;
+        const plannedCheckTime = Timer.nextClusterCheckTimestamp(checkHour, user.tz)
         Store.update(payload.channel.id, {
           clusterDns: value,
-          checkTime: '7pm',
+          checkHour,
           configuredBy: { 
             userId: user.id,
             userName: user.name,
           },
+          clusterCheckTime: plannedCheckTime.nextCheckTimestamp,
+          clusterTerminationTime: plannedCheckTime.nextTerminationTimestamp,
           timeZone: user.tz,
         });
         break;
