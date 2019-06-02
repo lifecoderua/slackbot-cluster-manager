@@ -9,7 +9,7 @@ let stacksList = [];
 
 var CronJob = require('cron').CronJob;
 const job = new CronJob('0 */5 * * * *', () => {
-  console.log('You will see this message every minute', Date.now());
+  console.log('You will see this message every 5 minutes', Date.now());
   run();
 });
 
